@@ -30,9 +30,9 @@ description:
     - Manages PostgreSQL streaming replication backup on master, import to standby
 version_added: ""
 options:
-    mode:
+    action:
         description:
-            - module operating mode. Could be backup_sync (pg_start_backup, rsync & pg_stop_backup)
+            - module action. Could be backup_sync (pg_start_backup, rsync & pg_stop_backup)
         required: False
         choices:
             - backup_sync
@@ -53,12 +53,11 @@ options:
 
 EXAMPLES = '''
 # Import base backup from master
-- postgresql_replication: mode=backup_sync
+- postgresql_replication: action=backup_sync
 '''
 
 try:
     import psycopg2
-    import psycopg2.extras
 except ImportError:
     postgresqldb_found = False
 else:
@@ -71,6 +70,7 @@ else:
 def main():
     module = AnsibleModule(
         argument_spec=dict(
+            action=dict(default="backup_sync"),
             master_user=dict(default="postgres"),
             master_password=dict(default=""),
             master_host=dict(default=""),
@@ -89,9 +89,9 @@ def main():
     # check which values are empty and don't include in the **kw
     # dictionary
     params_map = {
-        "login_host":"host",
-        "login_user":"user",
-        "login_password":"password",
+        "master_host":"host",
+        "master_user":"user",
+        "master_password":"password",
         "port":"port"
     }
     kw = dict( (params_map[k], v) for (k, v) in module.params.iteritems() 
